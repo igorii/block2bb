@@ -1,18 +1,18 @@
 block2bb
 ========
 
-# Description
+### Description
 
 This is a very simple parser for Literate Haskell files that use a tex-like notation for denoting blocks of code. The expected format is:
 \{code}    -> begins a block of code
 \{endCode} -> ends a block of code
 Both blocks of code and Bird Beak lines are converted to Bird Beak notation to be compiled. All other lines are considered comments.
 
-# Reasoning
+### Reasoning
 
 There are many advantages to useing a block notation rather than '>' on each line, especially for larger blocks of code. For a quick idea, see [...]
 
-# Use
+### Use
 
 See README.md
 

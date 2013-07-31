@@ -11,9 +11,11 @@ Rather than:
 
 One would write
 
+```
 \{code}
 main = printStr "Hello there"
 \{endCode}
+```
 
 This looks silly given a one line example, but for larger code blocks it could be quite useful. This allows for many advantages when maintaining larger files. Most notably, managing whitespace is much easier now that there is not an extra character hanging around in column 1.
 
