@@ -7,7 +7,9 @@ A very simple parser for Literate Haskell files. Rather than writing the Literat
 
 Rather than: 
 
+```
 > main = printStr "Hello there"
+```
 
 One would write
 
