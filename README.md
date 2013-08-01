@@ -1,7 +1,7 @@
 Block2BB
 ========
 
-A very simple parser for Literate Haskell files. Rather than writing the Literate Haskell file using 'Bird Beak' notation, I would prefer to use a notation similar to tex.
+A very simple parser for Literate Haskell files. Rather than writing the Literate Haskell file using 'Bird Beak' notation, I would prefer to use a notation similar to TeX.
 
 ### Why?
 
