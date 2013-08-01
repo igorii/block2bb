@@ -1,0 +1,38 @@
+<h1 id="block2bb">block2bb</h1>
+<h2 id="description">Description</h2>
+<p>This is a very simple parser for Literate Haskell files that use a tex-like notation for denoting blocks of code. The expected format is: {code} -&gt; begins a block of code {endCode} -&gt; ends a block of code Both blocks of code and Bird Beak lines are converted to Bird Beak notation to be compiled. All other lines are considered comments.</p>
+<h2 id="reasoning">Reasoning</h2>
+<p>There are many advantages to useing a block notation rather than '&gt;' on each line, especially for larger blocks of code. For a quick idea, see [...]</p>
+<h2 id="use">Use</h2>
+<p>See README.md</p>
+<pre class="sourceCode literate haskell"><code class="sourceCode haskell"><span class="kw">module</span> <span class="dt">Main</span> <span class="kw">where</span> </code></pre>
+<p>The application accepts filenames from the command line, and thus needs to import <code>getArgs</code> from System.Environment. <code>getArgs</code> is an IO action of the form <code>IO [String]</code>, which returns a list of the command line arguments. For example, calling getArgs on a function <code>foo</code> called as <code>./foo a1 a2 a3</code> would return [&quot;a1&quot;, &quot;a2&quot;, &quot;a3&quot;].</p>
+<pre class="sourceCode literate haskell"><code class="sourceCode haskell"><span class="kw">import</span> System.Environment (getArgs)</code></pre>
+<p>The main logic works by recursively cycling through two functions. These are the first two functions defined. The first is the entry point, and takes a list of strings (the string representation of each line of a file). This function simply returns each line of the file until it parses a <code>&quot;\{code}&quot;</code> string.</p>
+<p>At the point when a <code>&quot;\{code}&quot;</code> string is found, the second function takes over. This second function prepends a &quot;&gt; &quot; to each line until a <code>&quot;\{endCode}&quot;</code> string is found. At that point, the first function again takes over.</p>
+<p>The pattern repeats until the list of strings is exhausted.</p>
+<pre class="sourceCode literate haskell"><code class="sourceCode haskell"><span class="ot">processFile ::</span> [<span class="dt">String</span>] <span class="ot">-&gt;</span> [<span class="dt">String</span>]
+processFile []     <span class="fu">=</span> []
+processFile (l<span class="fu">:</span>ls) <span class="fu">=</span> <span class="kw">case</span> l <span class="kw">of</span>
+  <span class="st">&quot;\\{code}&quot;</span> <span class="ot">-&gt;</span> processCode ls
+  <span class="fu">otherwise</span>  <span class="ot">-&gt;</span> [l] <span class="fu">++</span> processFile ls</code></pre>
+<pre class="sourceCode literate haskell"><code class="sourceCode haskell"><span class="ot">processCode ::</span> [<span class="dt">String</span>] <span class="ot">-&gt;</span> [<span class="dt">String</span>]
+processCode []     <span class="fu">=</span> []
+processCode (l<span class="fu">:</span>ls) <span class="fu">=</span> <span class="kw">case</span> l <span class="kw">of</span> 
+  <span class="st">&quot;\\{endCode}&quot;</span> <span class="ot">-&gt;</span> processFile ls
+  <span class="fu">otherwise</span>     <span class="ot">-&gt;</span> [<span class="st">&quot;&gt;&quot;</span> <span class="fu">++</span> l] <span class="fu">++</span> processCode ls</code></pre>
+<p><code>convertFile</code> simply turns a file into <code>[String]</code>, which is processed with <code>processFile</code>, and then written to a new file with the extension &quot;.bb.lhs&quot;.</p>
+<pre class="sourceCode literate haskell"><code class="sourceCode haskell">convertFile file <span class="fu">=</span> <span class="kw">do</span>
+  contents <span class="ot">&lt;-</span> <span class="fu">readFile</span> file
+  <span class="kw">let</span> newFile <span class="fu">=</span> (dropExtension file) <span class="fu">++</span> <span class="st">&quot;.bb.lhs&quot;</span>
+  <span class="fu">writeFile</span> newFile <span class="fu">$</span> <span class="fu">unlines</span> <span class="fu">$</span> processFile <span class="fu">$</span> <span class="fu">lines</span> contents</code></pre>
+<p>Here is a simple recursive convenience function to drop the extension of a file. All characters that appear before the first '.' are returned.</p>
+<pre class="sourceCode literate haskell"><code class="sourceCode haskell"><span class="ot">dropExtension        ::</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">String</span>
+dropExtension []     <span class="fu">=</span> []
+dropExtension (x<span class="fu">:</span>xs) <span class="fu">=</span>  <span class="kw">case</span> x <span class="kw">of</span>
+  <span class="ch">&#39;.&#39;</span> <span class="ot">-&gt;</span> []
+  <span class="fu">otherwise</span> <span class="ot">-&gt;</span> [x] <span class="fu">++</span> dropExtension xs</code></pre>
+<p>And the main function, simpler still. Get the arguments, and call <code>convertFile</code> on each. Since the result of getArgs is <code>IO [String]</code> rather than a plain <code>[String]</code>, <code>mapM</code> is used here rather than <code>map</code>. <code>mapM</code> works as a replacement for <code>map</code> when dealing with data within a monad.</p>
+<pre class="sourceCode literate haskell"><code class="sourceCode haskell">main <span class="fu">=</span> <span class="kw">do</span>
+  args <span class="ot">&lt;-</span> getArgs
+  <span class="fu">mapM</span> convertFile args</code></pre>
